@@ -1,19 +1,18 @@
-import { BrowserModule } from '@angular/platform-browser';
+import { BrowserModule, HAMMER_GESTURE_CONFIG } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './components/app.component';
-import {MatTableModule} from '@angular/material/table';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatNativeDateModule} from '@angular/material/core';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {MAT_FORM_FIELD_DEFAULT_OPTIONS} from '@angular/material/form-field';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatInputModule} from '@angular/material/input';
 import {MatDividerModule} from '@angular/material/divider';
 import {MatListModule} from '@angular/material/list';
-
+import {MatSliderModule} from '@angular/material/slider';
+import { GestureConfig } from '@angular/material';
 
 
 @NgModule({
@@ -23,7 +22,6 @@ import {MatListModule} from '@angular/material/list';
   imports: [
     BrowserModule,
     AppRoutingModule,
-    MatTableModule,
     BrowserModule,
     BrowserAnimationsModule,
     FormsModule,
@@ -34,9 +32,10 @@ import {MatListModule} from '@angular/material/list';
     MatInputModule,
     MatDividerModule,
     MatListModule,
+    MatSliderModule,
   ],
-  providers: [ { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'fill' } },
-],
+  providers: [{provide: HAMMER_GESTURE_CONFIG, useClass: GestureConfig}
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

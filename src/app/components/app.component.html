@@ -10,35 +10,37 @@
 <body>
     <div id="map"></div>
     <div class="box">
+        <h1 id="status"></h1>
         <mat-list>
-            <mat-list-item>ID: <p>{{ID}}</p> </mat-list-item>
+            <mat-list-item>ID: <p id="id"></p> </mat-list-item>
             <mat-divider class="divider"></mat-divider>
-            <mat-list-item>Ident: <p>{{Ident}}</p> </mat-list-item>
+            <mat-list-item>Ident: <p id="ident"></p> </mat-list-item>
             <mat-divider class="divider"></mat-divider>
-            <mat-list-item>Name: <p>{{Name}}</p> </mat-list-item>
+            <mat-list-item>Name: <p id="name"></p> </mat-list-item>
             <mat-divider class="divider"></mat-divider>
-            <mat-list-item>Continent: <p>{{Continent}}</p></mat-list-item>
+            <mat-list-item>Continent: <p id="continent"></p></mat-list-item>
             <mat-divider class="divider"></mat-divider>
-            <mat-list-item>ISO_Country: <p>{{ISO_Country}}</p></mat-list-item>
+            <mat-list-item>ISO_Country: <p id="iso_country"></p></mat-list-item>
             <mat-divider class="divider"></mat-divider>
-            <mat-list-item>ISO_Region: <p>{{ISO_Region}}</p></mat-list-item>
+            <mat-list-item>ISO_Region: <p id="iso_region"></p></mat-list-item>
             <mat-divider class="divider"></mat-divider>
-            <mat-list-item>Municipality: <p>{{Municipality}}</p></mat-list-item>
+            <mat-list-item>Municipality: <p id="municipality"></p></mat-list-item>
             <mat-divider class="divider"></mat-divider>
-            <mat-list-item>Scheduled_Service: <p>{{Scheduled_Service}}</p></mat-list-item>
+            <mat-list-item>Scheduled_Service: <p id="scheduled_service"></p></mat-list-item>
             <mat-divider class="divider"></mat-divider>
-            <mat-list-item>GPS_Code: <p>{{GPS_Code}}</p></mat-list-item>
+            <mat-list-item>GPS_Code: <p id="gps_code"></p></mat-list-item>
             <mat-divider class="divider"></mat-divider>
-            <mat-list-item>IATA_Code: <p>{{IATA_Code}}</p></mat-list-item>
+            <mat-list-item>IATA_Code: <p id="iata_code"></p></mat-list-item>
             <mat-divider class="divider"></mat-divider>
-            <mat-list-item>Local_Code: <p>{{Local_Code}}</p></mat-list-item>
-          </mat-list>
-        <mat-form-field class="calendar">
+            <mat-list-item>Local_Code: <p id="local_code"></p></mat-list-item>
+          </mat-list> 
+
+          <mat-form-field class="calendar">
             <mat-label>Choose a date</mat-label>
-            <input matInput [matDatepicker]="picker">
-            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker [startAt]="date" #picker></mat-datepicker>
-        </mat-form-field>
+            <input matInput [min]="minDate" [max]="maxDate" [matDatepicker]="picker" (dateChange)="updateCalcs($event)">
+            <mat-datepicker-toggle matSuffix [for]="picker" ></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
     </div>
     <router-outlet></router-outlet>
 </body>

@@ -8,10 +8,10 @@
 }
 .calendar{
     position: absolute;
-    top: 0;
+    top: 5%;
     left: 0;
-    width: 100%;
-    height: 100%;
+    margin: 1em;
+    width: 50%;
 }
 .box{
     position: absolute;
@@ -23,8 +23,26 @@
 }
 .box mat-list{
     position: absolute;
-    top: 70px;
+    top: 15%;
 }
 .divider{
-    width: 100vw;
+    width: 20vw;
+}
+mat-list-item p{
+    margin-left: 2px;
+    font-size: 15px;
+    word-wrap: break-word;
+}
+.slider{
+    position: absolute;
+    top: 20px;
+    left: 0%;
+}
+#status{
+    position: absolute;
+    top: 0;
+    background-color:red;
+    color:white;
+    margin: 0.5em;
+    width: 100%;
 }
