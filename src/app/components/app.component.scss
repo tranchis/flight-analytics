@@ -44,5 +44,11 @@ mat-list-item p{
     background-color:red;
     color:white;
     margin: 0.5em;
+    width: 90%;
+}
+#myDiv{
+    position: absolute;
+    top: 0;
     width: 100%;
+    z-index: 999;
 }

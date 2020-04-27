@@ -4,9 +4,11 @@ import {FormControl} from '@angular/forms';
 
 declare var mapboxgl: any;
 declare var turf: any;
+declare var Plotly:any;
 
 declare function require(arg:string): any;
 const environment = require('../../assets/auth/token.json');
+const tmpFlights = require('../../assets/airport/csvjson.json');
 const airports = 'https://raw.githubusercontent.com/mishaldholakia/large-airports/master/airport.geojson'
 
 @Component({
@@ -65,6 +67,8 @@ export class AppComponent implements OnInit {
 
         map.on('click', 'airports', function (e) {
           let tmpDate = localStorage.getItem('date');
+          if(!tmpDate)
+          tmpDate = '20200123';
           console.log(tmpDate);
           // console.log(e.features[0].properties);
           // console.log(e.features[0].properties.id);
@@ -144,7 +148,7 @@ export class AppComponent implements OnInit {
               });
           }
           else{
-            document.getElementById("status").innerHTML = "No flight data found";
+            document.getElementById("status").innerHTML = " No flight data found";
             setTimeout(() => {
               document.getElementById("status").innerHTML = "";
             }, 5000);
