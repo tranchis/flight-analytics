@@ -8,7 +8,6 @@ declare var Plotly:any;
 
 declare function require(arg:string): any;
 const environment = require('../../assets/auth/token.json');
-const tmpFlights = require('../../assets/airport/csvjson.json');
 const airports = 'https://raw.githubusercontent.com/mishaldholakia/large-airports/master/airport.geojson'
 
 @Component({
@@ -28,7 +27,7 @@ export class AppComponent implements OnInit {
   updateCalcs(event){
     var date_test = new Date(event.value);
     this.tmpDate = (date_test.getFullYear()).toString() + (('0' + (date_test.getMonth() + 1)).slice(-2)).toString() + (('0' + date_test.getDate()).slice(-2)).toString();
-    console.log(this.tmpDate);
+    // console.log(this.tmpDate);
     localStorage.setItem('date', this.tmpDate);
   }
 
@@ -50,7 +49,6 @@ export class AppComponent implements OnInit {
       });
       
       map.on('load', function() {
-        console.log(this.tmpDate); 
         window.setInterval(function() {
         map.getSource('airports').setData(airports);
         }, 2000);
@@ -69,40 +67,71 @@ export class AppComponent implements OnInit {
           let tmpDate = localStorage.getItem('date');
           if(!tmpDate)
           tmpDate = '20200123';
-          console.log(tmpDate);
+          // console.log(tmpDate);
           // console.log(e.features[0].properties);
           // console.log(e.features[0].properties.id);
           // console.log(e.features[0].geometry.coordinates);
           let tmpSource = e.features[0].geometry.coordinates
           this.source=[...tmpSource];
           // console.log(this.source);
-          document.getElementById("id").innerHTML = e.features[0].properties.id;
-          document.getElementById("ident").innerHTML = e.features[0].properties.Ident;
-          document.getElementById("name").innerHTML = e.features[0].properties.name;
-          document.getElementById("continent").innerHTML = e.features[0].properties.continent;
-          document.getElementById("iso_country").innerHTML = e.features[0].properties.iso_country;
-          document.getElementById("iso_region").innerHTML = e.features[0].properties.region;
-          document.getElementById("municipality").innerHTML = e.features[0].properties.municipality;
-          document.getElementById("scheduled_service").innerHTML = e.features[0].properties.scheduled_service;
-          document.getElementById("gps_code").innerHTML = e.features[0].properties.gps_code;
-          document.getElementById("iata_code").innerHTML = e.features[0].properties.iata_code;
-          document.getElementById("local_code").innerHTML = e.features[0].properties.local_code;
+
+          // document.getElementById("id").innerHTML = e.features[0].properties.id;
+          // document.getElementById("ident").innerHTML = e.features[0].properties.Ident;
+          // document.getElementById("name").innerHTML = e.features[0].properties.name;
+          // document.getElementById("continent").innerHTML = e.features[0].properties.continent;
+          // document.getElementById("iso_country").innerHTML = e.features[0].properties.iso_country;
+          // document.getElementById("iso_region").innerHTML = e.features[0].properties.region;
+          // document.getElementById("municipality").innerHTML = e.features[0].properties.municipality;
+          // document.getElementById("scheduled_service").innerHTML = e.features[0].properties.scheduled_service;
+          // document.getElementById("gps_code").innerHTML = e.features[0].properties.gps_code;
+          // document.getElementById("iata_code").innerHTML = e.features[0].properties.iata_code;
+          // document.getElementById("local_code").innerHTML = e.features[0].properties.local_code;
+          
           let airportCode = e.features[0].properties.iata_code;
+          
+          let apiDate = tmpDate
+          apiDate = apiDate.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
+          
+          let worldUrl = `http://localhost:4224/worldwide-aggregated?date=${apiDate}`
+          document.getElementById("dateData").innerHTML = apiDate;
+
+          fetch(worldUrl)
+          .then((response) => {
+            return response.json();
+          }).then((data) => {
+            console.log(data);
+            document.getElementById("worldConfirmedData").innerHTML = data.Confirmed;
+            document.getElementById("worldRecoveredData").innerHTML = data.Recovered;
+            document.getElementById("worldDeathData").innerHTML = data.Deaths;
+          })
+
+
+          let countryUrl = `http://localhost:4224/country-aggregated?date=${apiDate}&country=${e.features[0].properties.iso_country}`
+          fetch(countryUrl)
+          .then((response) => {
+            return response.json();
+          }).then((data) => {
+            console.log(data);
+            document.getElementById("countryName").innerHTML = data.Country;
+            document.getElementById("countryConfirmedData").innerHTML = data.Confirmed;
+            document.getElementById("countryRecoveredData").innerHTML = data.Recovered;
+            document.getElementById("countryDeathData").innerHTML = data.Deaths;
+          })
 
           // let url = `https://cors-anywhere.herokuapp.com/https://covid19-flight.atalaya.at/?airport=${airportCode}&date=${dateStr}`;
           let url = `https://cors-anywhere.herokuapp.com/https://covid19-flight.atalaya.at/?airport=${airportCode}&date=${tmpDate}`;
-          console.log(url);
+
           fetch(url)
           .then((response) => {
             return response.json();
           }).then((data) => {
             let tmpLength = Object.keys(data).length;
-            // console.log(Object.keys(data).length);
-
+            console.log(Object.keys(data).length);
+            document.getElementById("totalFlights").innerHTML = tmpLength.toString();
             if(tmpLength>0){
               data.forEach(element => {
-              // console.log(element);
-              let destination = [element.longitude_deg, element.latitude_deg];
+              try {
+                let destination = [element.longitude_deg, element.latitude_deg];
               var route = {
                 'type': 'FeatureCollection',
                 'features': [
@@ -145,6 +174,11 @@ export class AppComponent implements OnInit {
                   map.removeLayer(element.arrival_time+element.iata_code);
                   map.removeSource(element.arrival_time+element.iata_code);
                 }, 6000);
+                
+              } catch (error) {
+                console.log(error);
+                
+              }
               });
           }
           else{
