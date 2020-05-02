@@ -78,7 +78,7 @@ export class AppComponent implements OnInit {
           let apiDate = tmpDate
           apiDate = apiDate.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
           
-          let worldUrl = `http://localhost:4224/worldwide-aggregated?date=${apiDate}`
+          let worldUrl = `${environment.url}worldwide-aggregated?date=${apiDate}`
           document.getElementById("dateData").innerHTML = apiDate;
 
           // Fetch world covid data
@@ -93,7 +93,7 @@ export class AppComponent implements OnInit {
           })
 
           // Fetch country covid data
-          let countryUrl = `http://localhost:4224/country-aggregated?date=${apiDate}&country=${e.features[0].properties.iso_country}`
+          let countryUrl = `${environment.url}country-aggregated?date=${apiDate}&country=${e.features[0].properties.iso_country}`
           fetch(countryUrl)
           .then((response) => {
             return response.json();
