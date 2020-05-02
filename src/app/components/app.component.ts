@@ -24,6 +24,7 @@ export class AppComponent implements OnInit {
   tmpDate = '';
 
 
+  // Select calendar
   updateCalcs(event){
     var date_test = new Date(event.value);
     this.tmpDate = (date_test.getFullYear()).toString() + (('0' + (date_test.getMonth() + 1)).slice(-2)).toString() + (('0' + date_test.getDate()).slice(-2)).toString();
@@ -61,40 +62,26 @@ export class AppComponent implements OnInit {
           'icon-image': 'airport-15'
           }
           });
-          // this.map.on('click', this.updateCalcs.bind(this));
 
         map.on('click', 'airports', function (e) {
           let tmpDate = localStorage.getItem('date');
           if(!tmpDate)
           tmpDate = '20200123';
-          // console.log(tmpDate);
-          // console.log(e.features[0].properties);
-          // console.log(e.features[0].properties.id);
-          // console.log(e.features[0].geometry.coordinates);
           let tmpSource = e.features[0].geometry.coordinates
           this.source=[...tmpSource];
-          // console.log(this.source);
 
-          // document.getElementById("id").innerHTML = e.features[0].properties.id;
-          // document.getElementById("ident").innerHTML = e.features[0].properties.Ident;
-          // document.getElementById("name").innerHTML = e.features[0].properties.name;
-          // document.getElementById("continent").innerHTML = e.features[0].properties.continent;
-          // document.getElementById("iso_country").innerHTML = e.features[0].properties.iso_country;
-          // document.getElementById("iso_region").innerHTML = e.features[0].properties.region;
-          // document.getElementById("municipality").innerHTML = e.features[0].properties.municipality;
-          // document.getElementById("scheduled_service").innerHTML = e.features[0].properties.scheduled_service;
-          // document.getElementById("gps_code").innerHTML = e.features[0].properties.gps_code;
-          // document.getElementById("iata_code").innerHTML = e.features[0].properties.iata_code;
-          // document.getElementById("local_code").innerHTML = e.features[0].properties.local_code;
-          
+          // Selected airport code clicked on Map
           let airportCode = e.features[0].properties.iata_code;
           
+          
+          // Parse the date to match the API
           let apiDate = tmpDate
           apiDate = apiDate.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
           
           let worldUrl = `http://localhost:4224/worldwide-aggregated?date=${apiDate}`
           document.getElementById("dateData").innerHTML = apiDate;
 
+          // Fetch world covid data
           fetch(worldUrl)
           .then((response) => {
             return response.json();
@@ -105,7 +92,7 @@ export class AppComponent implements OnInit {
             document.getElementById("worldDeathData").innerHTML = data.Deaths;
           })
 
-
+          // Fetch country covid data
           let countryUrl = `http://localhost:4224/country-aggregated?date=${apiDate}&country=${e.features[0].properties.iso_country}`
           fetch(countryUrl)
           .then((response) => {
@@ -118,6 +105,7 @@ export class AppComponent implements OnInit {
             document.getElementById("countryDeathData").innerHTML = data.Deaths;
           })
 
+          // Fetch the total flights
           // let url = `https://cors-anywhere.herokuapp.com/https://covid19-flight.atalaya.at/?airport=${airportCode}&date=${dateStr}`;
           let url = `https://cors-anywhere.herokuapp.com/https://covid19-flight.atalaya.at/?airport=${airportCode}&date=${tmpDate}`;
 
