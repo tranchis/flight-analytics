@@ -4,7 +4,8 @@ import {FormControl} from '@angular/forms';
 
 declare var mapboxgl: any;
 declare var turf: any;
-declare var Plotly:any;
+declare var ApexCharts: any;
+
 
 declare function require(arg:string): any;
 const environment = require('../../assets/auth/token.json');
@@ -24,6 +25,7 @@ export class AppComponent implements OnInit {
   tmpDate = '';
 
 
+
   // Select calendar
   updateCalcs(event){
     var date_test = new Date(event.value);
@@ -39,12 +41,16 @@ export class AppComponent implements OnInit {
     this.maxDate = new Date(currentYear, 2, 31);
   }
 
-  ngOnInit() {
+  async ngOnInit() {
+
+    localStorage.setItem('tmpChartFlag', 'false');
+    
+
     mapboxgl.accessToken =environment.access_token;
     var map = new mapboxgl.Map({
         container: 'map',
         style: 'mapbox://styles/mapbox/light-v10',
-        center: [-96, 37.8],
+        center: [-50, -10.8],
         zoom: 1,
         minZoom: 1,
       });
@@ -62,14 +68,16 @@ export class AppComponent implements OnInit {
           'icon-image': 'airport-15'
           }
           });
+        });
 
-        map.on('click', 'airports', function (e) {
+        map.on('click', 'airports', async function (e) {
+
           let tmpDate = localStorage.getItem('date');
           if(!tmpDate)
           tmpDate = '20200123';
           let tmpSource = e.features[0].geometry.coordinates
           this.source=[...tmpSource];
-
+          
           // Selected airport code clicked on Map
           let airportCode = e.features[0].properties.iata_code;
           
@@ -78,15 +86,180 @@ export class AppComponent implements OnInit {
           let apiDate = tmpDate
           apiDate = apiDate.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
           
+
+          let countryAllUrl = `${environment.url}covid-aggregated?date=${apiDate}&country=${e.features[0].properties.iso_country}`
+
+            let totalCovidData = new Promise(function(resolve, reject) {
+              // Fetch countryAll covid data
+              fetch(countryAllUrl)
+              .then((response) => {
+                return response.json();
+              }).then((data) => {
+                resolve(data.data);
+              })
+            })
+
+          let calendarData =[];
+          calendarData.push(`31-Dec-19`)
+          for(let i=1;i<32;i++){
+            calendarData.push(`${i}-Jan-20`)
+          }
+          for(let i=1;i<30;i++){
+            calendarData.push(`${i}-Feb-20`)
+          }
+          for(let i=1;i<32;i++){
+            calendarData.push(`${i}-Mar-20`)
+          }
+          let getTotalFlightsUrl = `${environment.CORS}https://covid19-flight.atalaya.at/allFlights?airport=${airportCode}`;
+          console.log(getTotalFlightsUrl);
+
+          let totalFlightsData = new Promise(function(resolve, reject) {
+            console.log('inside totalFlightsData');
+            // Fetch total country flights data
+            fetch(getTotalFlightsUrl)
+            .then((response) => {
+              
+              console.log(`inside fetch then`, response);
+              return response.json();
+            }).then((data) => {
+              let income = [];
+
+              for(var propName in data) {
+                if(data.hasOwnProperty(propName)) {
+                  var propValue = data[propName];
+                  // console.log(`proValue:`, propValue);
+                  income.push(propValue);
+                  // console.log('income:', income);
+                }
+              }
+              if(income.length>0)
+              {
+                console.log('inside income.length')
+                resolve(income);
+              }
+            })
+          })
+
+          Promise.all([totalFlightsData, totalCovidData]).then((values) => {
+            // console.log(`totalCovidData:`, values[1]);
+            var options = {
+              series: [{
+              name: 'Flight',
+              type: 'line',
+              data: values[0]
+            }, {
+              name: 'COVID',
+              type: 'line',
+              data: values[1]
+            }],
+              chart: {
+              height: 300,
+              type: 'line',
+              stacked: false,
+              zoom: {
+                type: 'x',
+                enabled: true,
+                autoScaleYaxis: true
+              }
+            },
+            colors: ['#0f6dff', '#d6316c'],
+            dataLabels: {
+              enabled: false
+            },
+            stroke: {
+              width: [1, 1, 4]
+            },
+            // title: {
+            //   text: 'COVID and flight',
+            //   align: 'left',
+            //   offsetX: 20,
+            //   offsetY: 10
+            // },
+            xaxis: {
+              type: 'datetime',
+              categories: calendarData
+            },
+            yaxis: [
+              {
+                axisTicks: {
+                  show: true,
+                },
+                axisBorder: {
+                  show: true,
+                  color: '#0f6dff'
+                },
+                labels: {
+                  style: {
+                    colors: '#0f6dff',
+                  }
+                },
+                title: {
+                  text: "Total flights",
+                  style: {
+                    color: '#0f6dff',
+                  }
+                },
+                tooltip: {
+                  enabled: true
+                }
+              },
+              {
+                seriesName: 'Income',
+                opposite: true,
+                axisTicks: {
+                  show: true,
+                },
+                axisBorder: {
+                  show: true,
+                  color: '#d6316c'
+                },
+                labels: {
+                  style: {
+                    colors: '#d6316c',
+                  }
+                },
+                title: {
+                  text: "COVID (total country)",
+                  style: {
+                    color: '#d6316c',
+                  }
+                },
+              },
+            ],
+            tooltip: {
+              fixed: {
+                enabled: true,
+                position: 'topLeft', // topRight, topLeft, bottomRight, bottomLeft
+                offsetY: 30,
+                offsetX: 60
+              },
+            },
+            legend: {
+              horizontalAlign: 'left',
+              offsetX: 40
+            }
+            };
+  
+            var chart = new ApexCharts(document.querySelector("#chart"), options);
+            chart.render();
+  
+            let tmpflag = localStorage.getItem('tmpChartFlag')
+            if(tmpflag==='true'){
+              chart.updateOptions(options);
+            }
+            localStorage.setItem('tmpChartFlag', 'true');
+          });
+          
           let worldUrl = `${environment.url}worldwide-aggregated?date=${apiDate}`
           document.getElementById("dateData").innerHTML = apiDate;
+
 
           // Fetch world covid data
           fetch(worldUrl)
           .then((response) => {
             return response.json();
           }).then((data) => {
-            console.log(data);
+            // console.log(data);
             document.getElementById("worldConfirmedData").innerHTML = data.Confirmed;
             document.getElementById("worldRecoveredData").innerHTML = data.Recovered;
             document.getElementById("worldDeathData").innerHTML = data.Deaths;
@@ -98,7 +271,7 @@ export class AppComponent implements OnInit {
           .then((response) => {
             return response.json();
           }).then((data) => {
-            console.log(data);
+            // console.log(data);
             document.getElementById("countryName").innerHTML = data.Country;
             document.getElementById("countryConfirmedData").innerHTML = data.Confirmed;
             document.getElementById("countryRecoveredData").innerHTML = data.Recovered;
@@ -107,14 +280,14 @@ export class AppComponent implements OnInit {
 
           // Fetch the total flights
           // let url = `https://cors-anywhere.herokuapp.com/https://covid19-flight.atalaya.at/?airport=${airportCode}&date=${dateStr}`;
-          let url = `https://cors-anywhere.herokuapp.com/https://covid19-flight.atalaya.at/?airport=${airportCode}&date=${tmpDate}`;
-
+          let url = `${environment.CORS}https://covid19-flight.hpai.cloud/?airport=${airportCode}&date=${tmpDate}`;
+          // console.log(url);
           fetch(url)
           .then((response) => {
             return response.json();
           }).then((data) => {
             let tmpLength = Object.keys(data).length;
-            console.log(Object.keys(data).length);
+            // console.log(Object.keys(data).length);
             document.getElementById("totalFlights").innerHTML = tmpLength.toString();
             if(tmpLength>0){
               data.forEach(element => {
@@ -177,6 +350,7 @@ export class AppComponent implements OnInit {
           }
             })
         })
+
         var popup = new mapboxgl.Popup({
           closeButton: false,
           closeOnClick: false
@@ -200,6 +374,12 @@ export class AppComponent implements OnInit {
           map.getCanvas().style.cursor = '';
           popup.remove();
           });
-      });
+  }
+
+  fetchUrl(url) {
+
+
+
+
   }
 }

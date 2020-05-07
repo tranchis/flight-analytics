@@ -2,7 +2,7 @@
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
+    width: 80%;
     height: 100%;
     pointer-events:all;
 }
@@ -33,11 +33,6 @@ mat-list-item p{
     font-size: 15px;
     word-wrap: break-word;
 }
-.slider{
-    position: absolute;
-    top: 20px;
-    left: 0%;
-}
 #status{
     position: absolute;
     top: 0;
@@ -50,5 +45,17 @@ mat-list-item p{
     position: absolute;
     top: 0;
     width: 100%;
-    z-index: 999;
+    z-index: 199;
+}
+#chartBox{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    background-color: #f3f3f3;
+    width: 80%;
+
+    overflow-y: hidden;
+    transition: visibility 1s;
+    transition-duration: 12s;
+    transition-timing-function: ease-in-out;
 }
