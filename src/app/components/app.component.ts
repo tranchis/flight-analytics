@@ -236,7 +236,7 @@ export class AppComponent implements OnInit {
                   }
                 },
                 title: {
-                  text: "Total flights",
+                  text: "Total COVID confirmed cases",
                   style: {
                     color: '#d6316c',
                   }
