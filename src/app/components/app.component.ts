@@ -256,6 +256,14 @@ export class AppComponent implements OnInit {
                 offsetX: 60,
                 followCursor: true,
               },
+            },
+            legend: {
+              horizontalAlign: 'right',
+              offsetY: 20,
+              position: 'top',
+              tooltipHoverFormatter: function(seriesName, opts) {
+                return seriesName + ' - <strong>' + opts.w.globals.series[opts.seriesIndex][opts.dataPointIndex] + '</strong>'
+            }
             }
             };
   
