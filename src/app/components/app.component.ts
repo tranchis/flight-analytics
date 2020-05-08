@@ -87,39 +87,66 @@ export class AppComponent implements OnInit {
           apiDate = apiDate.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
           
 
+          // Returns an array of dates between the two dates
+          var getDates = function(startDate, endDate) {
+            var dates = [],
+                currentDate = startDate,
+                addDays = function(days) {
+                  var date = new Date(this.valueOf());
+                  date.setDate(date.getDate() + days);
+                  return date;
+                };
+            while (currentDate <= endDate) {
+              dates.push(currentDate);
+              currentDate = addDays.call(currentDate, 1);
+            }
+            return dates;
+          };
+
+          // Usage
+          var dates = getDates(new Date(2019,12,1), new Date());
+          const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+          "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"
+          ];
+          let calendarData = [];
+          calendarData.push(`31-Dec-19`)
+          dates.forEach(function(date) {
+            let tmp = date.getMonth();
+            let currentDay = (date.getDate()).toString();
+            let currentMonth = monthNames[tmp];
+            let currentYear = (date.getFullYear().toString().substr(-2)).toString();
+            let currentDate = `${currentDay}-${currentMonth}-${currentYear}`;
+            calendarData.push(currentDate);
+          });
+
           let countryAllUrl = `${environment.url}covid-aggregated?date=${apiDate}&country=${e.features[0].properties.iso_country}`
 
-            let totalCovidData = new Promise(function(resolve, reject) {
-              // Fetch countryAll covid data
-              fetch(countryAllUrl)
-              .then((response) => {
-                return response.json();
-              }).then((data) => {
-                resolve(data.data);
-              })
+          let totalCovidData = new Promise(function(resolve, reject) {
+            // Fetch countryAll covid data
+            fetch(countryAllUrl)
+            .then((response) => {
+              return response.json();
+            }).then((data) => {
+              // let result =[];
+              // for (const [i, v] of data.data.entries()) {
+              //   // console.log(i, v)
+              //   let tmp = {x:calendarData[i], y:parseInt(v)};
+              //   result.push(tmp);
+              // }
+              // if(result.length>10)
+              // resolve(result);
+              resolve(data.data);
             })
+          })
 
-          let calendarData =[];
-          calendarData.push(`31-Dec-19`)
-          for(let i=1;i<32;i++){
-            calendarData.push(`${i}-Jan-20`)
-          }
-          for(let i=1;i<30;i++){
-            calendarData.push(`${i}-Feb-20`)
-          }
-          for(let i=1;i<32;i++){
-            calendarData.push(`${i}-Mar-20`)
-          }
+
           let getTotalFlightsUrl = `${environment.CORS}https://covid19-flight.atalaya.at/allFlights?airport=${airportCode}`;
-          console.log(getTotalFlightsUrl);
 
           let totalFlightsData = new Promise(function(resolve, reject) {
-            console.log('inside totalFlightsData');
-            // Fetch total country flights data
+            
+          // Fetch total country flights data
             fetch(getTotalFlightsUrl)
-            .then((response) => {
-              
-              console.log(`inside fetch then`, response);
+            .then((response) => {              
               return response.json();
             }).then((data) => {
               let income = [];
@@ -127,21 +154,21 @@ export class AppComponent implements OnInit {
               for(var propName in data) {
                 if(data.hasOwnProperty(propName)) {
                   var propValue = data[propName];
-                  // console.log(`proValue:`, propValue);
                   income.push(propValue);
-                  // console.log('income:', income);
                 }
               }
               if(income.length>0)
               {
-                console.log('inside income.length')
                 resolve(income);
               }
             })
           })
 
-          Promise.all([totalFlightsData, totalCovidData]).then((values) => {
-            // console.log(`totalCovidData:`, values[1]);
+          Promise.all([totalFlightsData, totalCovidData]).then((values: any[]) => {
+      
+            let flight = values[0];
+            flight.length=values[1].length;
+
             var options = {
               series: [{
               name: 'Flight',
@@ -163,18 +190,9 @@ export class AppComponent implements OnInit {
               }
             },
             colors: ['#0f6dff', '#d6316c'],
-            dataLabels: {
-              enabled: false
-            },
             stroke: {
-              width: [1, 1, 4]
+              width: [1, 1]
             },
-            // title: {
-            //   text: 'COVID and flight',
-            //   align: 'left',
-            //   offsetX: 20,
-            //   offsetY: 10
-            // },
             xaxis: {
               type: 'datetime',
               categories: calendarData
@@ -201,10 +219,9 @@ export class AppComponent implements OnInit {
                 },
                 tooltip: {
                   enabled: true
-                }
+                },
               },
               {
-                seriesName: 'Income',
                 opposite: true,
                 axisTicks: {
                   show: true,
@@ -219,24 +236,26 @@ export class AppComponent implements OnInit {
                   }
                 },
                 title: {
-                  text: "COVID (total country)",
+                  text: "Total flights",
                   style: {
                     color: '#d6316c',
                   }
                 },
+                tooltip: {
+                  enabled: true
+                }
               },
             ],
             tooltip: {
               fixed: {
                 enabled: true,
+                shared: true,
+                intersect: false,
                 position: 'topLeft', // topRight, topLeft, bottomRight, bottomLeft
                 offsetY: 30,
-                offsetX: 60
+                offsetX: 60,
+                followCursor: true,
               },
-            },
-            legend: {
-              horizontalAlign: 'left',
-              offsetX: 40
             }
             };
   
@@ -248,6 +267,8 @@ export class AppComponent implements OnInit {
               chart.updateOptions(options);
             }
             localStorage.setItem('tmpChartFlag', 'true');
+
+
           });
           
           let worldUrl = `${environment.url}worldwide-aggregated?date=${apiDate}`
