@@ -80,6 +80,11 @@ export class AppComponent implements OnInit {
           
           // Selected airport code clicked on Map
           let airportCode = e.features[0].properties.iata_code;
+
+          localStorage.setItem('airport', e.features[0].properties.name);
+          console.log(e.features[0].properties,);
+
+          
           
           
           // Parse the date to match the API
@@ -127,14 +132,6 @@ export class AppComponent implements OnInit {
             .then((response) => {
               return response.json();
             }).then((data) => {
-              // let result =[];
-              // for (const [i, v] of data.data.entries()) {
-              //   // console.log(i, v)
-              //   let tmp = {x:calendarData[i], y:parseInt(v)};
-              //   result.push(tmp);
-              // }
-              // if(result.length>10)
-              // resolve(result);
               resolve(data.data);
             })
           })
@@ -165,6 +162,11 @@ export class AppComponent implements OnInit {
           })
 
           Promise.all([totalFlightsData, totalCovidData]).then((values: any[]) => {
+
+            let airport = localStorage.getItem('airport');
+            let country = localStorage.getItem('country');
+
+            let heading = `Airport: ${airport} & Country: ${country}`;
       
             let flight = values[0];
             flight.length=values[1].length;
@@ -257,9 +259,23 @@ export class AppComponent implements OnInit {
                 followCursor: true,
               },
             },
+            title: {
+              text: heading,
+              align: 'left',
+              margin: 10,
+              offsetX: 0,
+              offsetY: 0,
+              floating: false,
+              style: {
+                fontSize:  '14px',
+                fontWeight:  'bold',
+                fontFamily:  undefined,
+                color:  '#263238'
+              },
+          },
             legend: {
               horizontalAlign: 'right',
-              offsetY: 20,
+              offsetY: 10,
               position: 'top',
               tooltipHoverFormatter: function(seriesName, opts) {
                 return seriesName + ' - <strong>' + opts.w.globals.series[opts.seriesIndex][opts.dataPointIndex] + '</strong>'
@@ -301,6 +317,7 @@ export class AppComponent implements OnInit {
             return response.json();
           }).then((data) => {
             // console.log(data);
+            localStorage.setItem('country', data.Country);
             document.getElementById("countryName").innerHTML = data.Country;
             document.getElementById("countryConfirmedData").innerHTML = data.Confirmed;
             document.getElementById("countryRecoveredData").innerHTML = data.Recovered;
@@ -309,7 +326,7 @@ export class AppComponent implements OnInit {
 
           // Fetch the total flights
           // let url = `https://cors-anywhere.herokuapp.com/https://covid19-flight.atalaya.at/?airport=${airportCode}&date=${dateStr}`;
-          let url = `${environment.CORS}https://covid19-flight.hpai.cloud/?airport=${airportCode}&date=${tmpDate}`;
+          let url = `${environment.CORS}https://covid19-flight.atalaya.at/?airport=${airportCode}&date=${tmpDate}`;
           // console.log(url);
           fetch(url)
           .then((response) => {
