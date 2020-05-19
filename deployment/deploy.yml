@@ -24,7 +24,7 @@
         force: yes
     - name: Deploy images
       docker_container:
-        name: "covid19.flight"
+        name: "covid19.flight-analytics"
         image: "{{ lookup('env', 'REGISTRY_SERVER') }}/{{ lookup('env', 'GROUP_NAMESPACE') }}/covid19-flight-analytics:{{ lookup('env', 'CI_PIPELINE_IID') }}"
         state: started
         ports:
