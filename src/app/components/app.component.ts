@@ -137,7 +137,7 @@ export class AppComponent implements OnInit {
           })
 
 
-          let getTotalFlightsUrl = `${environment.CORS}https://covid19-flight.atalaya.at/allFlights?airport=${airportCode}`;
+          let getTotalFlightsUrl = `https://covid19-flight.atalaya.at/allFlights?airport=${airportCode}`;
 
           let totalFlightsData = new Promise(function(resolve, reject) {
             
@@ -326,7 +326,7 @@ export class AppComponent implements OnInit {
 
           // Fetch the total flights
           // let url = `https://cors-anywhere.herokuapp.com/https://covid19-flight.atalaya.at/?airport=${airportCode}&date=${dateStr}`;
-          let url = `${environment.CORS}https://covid19-flight.atalaya.at/?airport=${airportCode}&date=${tmpDate}`;
+          let url = `https://covid19-flight.atalaya.at/?airport=${airportCode}&date=${tmpDate}`;
           // console.log(url);
           fetch(url)
           .then((response) => {
